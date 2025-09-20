@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -16,9 +16,9 @@ export default function PendingApprovalPage() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <p className="text-center">Please log in to continue.</p>
-            <Button asChild className="w-full mt-4">
-              <Link href="/login">Go to Login</Link>
-            </Button>
+            <Link href="/login" className="w-full mt-4 block">
+              <Button className="w-full">Go to Login</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -62,9 +62,11 @@ export default function PendingApprovalPage() {
           )}
 
           <div className="pt-4">
-            <Button asChild variant="outline" className="w-full mb-2 bg-transparent">
-              <Link href="/pricing">View Pricing Plans</Link>
-            </Button>
+            <Link href="/pricing" className="w-full mb-2 block">
+              <Button variant="outline" className="w-full bg-transparent">
+                View Pricing Plans
+              </Button>
+            </Link>
             <Button onClick={logout} variant="ghost" className="w-full">
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out

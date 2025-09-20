@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "backdrop-blur-sm",
           "before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/0 before:via-white/10 before:to-white/0",
           "before:translate-x-[-100%] before:group-hover:translate-x-[100%] before:transition-transform before:duration-700",
-          "after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/5 after:to-transparent after:opacity-0 after:group-hover:opacity-100 after:transition-opacity after:duration-300"
+          "after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/5 after:to-transparent after:opacity-0 after:group-hover:opacity-100 after:transition-opacity after:duration-300",
         ],
         destructive: [
           "bg-gradient-to-r from-red-600 via-red-700 to-rose-700",
@@ -28,7 +28,7 @@ const buttonVariants = cva(
           "border border-red-500/20",
           "backdrop-blur-sm",
           "before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/0 before:via-white/10 before:to-white/0",
-          "before:translate-x-[-100%] before:group-hover:translate-x-[100%] before:transition-transform before:duration-700"
+          "before:translate-x-[-100%] before:group-hover:translate-x-[100%] before:transition-transform before:duration-700",
         ],
         outline: [
           "border-2 border-slate-200/60 dark:border-slate-700/60",
@@ -39,7 +39,7 @@ const buttonVariants = cva(
           "hover:border-slate-300/80 dark:hover:border-slate-600/80",
           "hover:shadow-lg hover:shadow-slate-500/10",
           "before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-r before:from-transparent before:via-slate-200/20 before:to-transparent dark:before:via-slate-700/20",
-          "before:translate-x-[-100%] before:group-hover:translate-x-[100%] before:transition-transform before:duration-500"
+          "before:translate-x-[-100%] before:group-hover:translate-x-[100%] before:transition-transform before:duration-500",
         ],
         secondary: [
           "bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800",
@@ -48,7 +48,7 @@ const buttonVariants = cva(
           "hover:from-slate-50 hover:via-slate-100 hover:to-slate-50 dark:hover:from-slate-700 dark:hover:via-slate-600 dark:hover:to-slate-700",
           "hover:shadow-lg hover:shadow-slate-500/20",
           "before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/0 before:via-white/20 before:to-white/0 dark:before:via-slate-400/10",
-          "before:translate-x-[-100%] before:group-hover:translate-x-[100%] before:transition-transform before:duration-600"
+          "before:translate-x-[-100%] before:group-hover:translate-x-[100%] before:transition-transform before:duration-600",
         ],
         ghost: [
           "text-slate-600 dark:text-slate-400",
@@ -56,14 +56,14 @@ const buttonVariants = cva(
           "hover:text-slate-700 dark:hover:text-slate-300",
           "backdrop-blur-sm",
           "before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-slate-200/30 before:to-transparent dark:before:via-slate-700/30",
-          "before:scale-x-0 before:group-hover:scale-x-100 before:transition-transform before:duration-300 before:origin-center"
+          "before:scale-x-0 before:group-hover:scale-x-100 before:transition-transform before:duration-300 before:origin-center",
         ],
         link: [
           "text-blue-600 dark:text-blue-400",
           "underline-offset-4 hover:underline",
           "relative",
           "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-gradient-to-r after:from-blue-600 after:to-indigo-600",
-          "hover:after:w-full after:transition-all after:duration-300"
+          "hover:after:w-full after:transition-all after:duration-300",
         ],
       },
       size: {
@@ -88,36 +88,36 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    
+    if (asChild) {
+      return (
+        <Slot className={cn(buttonVariants({ variant, size }), className)} ref={ref} {...props}>
+          {children}
+        </Slot>
+      )
+    }
+
     return (
-      <Comp 
-        className={cn(buttonVariants({ variant, size }), className)} 
-        ref={ref} 
-        {...props}
-      >
+      <button className={cn(buttonVariants({ variant, size }), className)} ref={ref} {...props}>
         {/* Liquid Glass Effect Layers */}
         {variant === "default" && (
           <>
             {/* Floating orb effect */}
             <div className="absolute top-1/2 left-1/2 w-0 h-0 bg-white/20 rounded-full group-hover:w-12 group-hover:h-12 group-hover:-translate-x-6 group-hover:-translate-y-6 transition-all duration-500 blur-md"></div>
-            
+
             {/* Ripple effect */}
             <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-active:opacity-100 group-active:animate-pulse transition-opacity duration-150"></div>
           </>
         )}
-        
+
         {/* Content with glass reflection */}
-        <span className="relative z-10 flex items-center justify-center gap-2">
-          {children}
-        </span>
-        
+        <span className="relative z-10 flex items-center justify-center gap-2">{children}</span>
+
         {/* Glass shine effect */}
         <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent rounded-t-[inherit] opacity-60"></div>
-        
+
         {/* Bottom subtle shadow */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-black/10 rounded-full blur-sm opacity-50"></div>
-      </Comp>
+      </button>
     )
   },
 )

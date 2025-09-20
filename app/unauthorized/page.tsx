@@ -15,12 +15,14 @@ export default function UnauthorizedPage() {
             If you believe this is an error, please contact your administrator.
           </p>
           <div className="flex gap-2">
-            <Button asChild variant="outline" className="flex-1 bg-transparent">
-              <Link href="/">Go Home</Link>
-            </Button>
-            <Button asChild className="flex-1">
-              <Link href="/login">Login</Link>
-            </Button>
+            <Link href="/" className="flex-1">
+              <Button variant="outline" className="w-full bg-transparent">
+                Go Home
+              </Button>
+            </Link>
+            <Link href="/login" className="flex-1">
+              <Button className="w-full">Login</Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
