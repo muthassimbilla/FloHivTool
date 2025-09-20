@@ -61,7 +61,7 @@ export function NotificationBell() {
               <div
                 key={notification.id}
                 className={`p-4 border-b hover:bg-muted/50 transition-colors ${
-                  !notification.read ? "bg-blue-50/50 dark:bg-blue-950/20" : ""
+                  !notification.is_read ? "bg-blue-50/50 dark:bg-blue-950/20" : ""
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -76,7 +76,7 @@ export function NotificationBell() {
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
-                        {!notification.read && (
+                        {!notification.is_read && (
                           <Button
                             variant="ghost"
                             size="sm"
