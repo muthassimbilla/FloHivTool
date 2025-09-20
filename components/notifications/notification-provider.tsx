@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
 import { CheckCircle, AlertCircle, Info } from "lucide-react"
@@ -37,19 +37,23 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!user) return
 
     const loadNotifications = async () => {
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user.uid)
-        .order("created_at", { ascending: false })
-        .limit(50)
+      try {
+        const { data, error } = await supabase
+          .from("notifications")
+          .select("*")
+          .eq("user_id", user.uid)
+          .order("created_at", { ascending: false })
+          .limit(50)
 
-      if (error) {
+        if (error) {
+          console.error("Error loading notifications:", error)
+          return
+        }
+
+        setNotifications(data || [])
+      } catch (error) {
         console.error("Error loading notifications:", error)
-        return
       }
-
-      setNotifications(data || [])
     }
 
     loadNotifications()
@@ -73,7 +77,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           setNotifications((prev) => [newNotification, ...prev])
 
           // Show toast notification
-          const icon = getNotificationIcon(newNotification.type)
           toast({
             title: newNotification.title,
             description: newNotification.message,
@@ -163,7 +166,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         deleteNotification,
       }}
     >
-      {children}
+      <>{children}</>
     </NotificationContext.Provider>
   )
 }

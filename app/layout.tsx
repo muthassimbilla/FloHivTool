@@ -15,6 +15,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.SITE_URL || "https://flohivtool.vercel.app"),
   title: "UAGen Pro - Professional User Agent Generator for iOS & Samsung",
   description:
     "Generate thousands of unique, professional-grade iOS and Samsung user agents for Instagram and Facebook. Fast, secure, and reliable user agent generation tool.",
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://uagen-pro.vercel.app",
+    url: process.env.SITE_URL || "https://flohivtool.vercel.app",
     siteName: "UAGen Pro",
     title: "UAGen Pro - Professional User Agent Generator",
     description:
@@ -114,7 +115,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthProvider>
-            <NotificationProvider>{children}</NotificationProvider>
+            <NotificationProvider>
+              <div className="min-h-screen">{children}</div>
+            </NotificationProvider>
           </AuthProvider>
           <Toaster />
         </ThemeProvider>
