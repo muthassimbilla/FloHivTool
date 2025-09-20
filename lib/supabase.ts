@@ -25,6 +25,17 @@ export const isSupabaseAvailable = () => {
   return Boolean(supabaseUrl && supabaseAnonKey)
 }
 
+interface DatabaseRecord {
+  id?: string
+  created_at?: string
+  updated_at?: string
+  [key: string]: any
+}
+
+interface CreateData extends Omit<DatabaseRecord, "id" | "created_at" | "updated_at"> {}
+interface UpdateData extends Partial<Omit<DatabaseRecord, "id" | "created_at">> {}
+interface FilterData extends Record<string, any> {}
+
 // Database entity classes
 export class BaseEntity {
   static tableName = ""
@@ -55,7 +66,7 @@ export class BaseEntity {
     return data || []
   }
 
-  static async create(data: any) {
+  static async create(data: CreateData) {
     if (!isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
@@ -74,7 +85,7 @@ export class BaseEntity {
     return result
   }
 
-  static async update(id: string, data: any) {
+  static async update(id: string, data: UpdateData) {
     if (!isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
@@ -111,7 +122,7 @@ export class BaseEntity {
     return true
   }
 
-  static async filter(filters: any, orderBy = "id", limit = 100) {
+  static async filter(filters: FilterData, orderBy = "id", limit = 100) {
     if (!isSupabaseAvailable()) {
       console.warn(`Supabase not available for ${this.tableName}`)
       return []
@@ -177,7 +188,7 @@ export class GenerationHistory extends BaseEntity {
 export class BlacklistedUserAgent extends BaseEntity {
   static tableName = "blacklisted_user_agents"
 
-  static async createOrUpdate(data: any) {
+  static async createOrUpdate(data: CreateData) {
     if (!isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
@@ -204,7 +215,7 @@ export class BlacklistedUserAgent extends BaseEntity {
     return result
   }
 
-  static async bulkCreateOrUpdate(dataArray: any[]) {
+  static async bulkCreateOrUpdate(dataArray: CreateData[]) {
     if (!isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
@@ -413,12 +424,9 @@ async function generateUserAgent() {
     const fbss = deviceScalingData ? deviceScalingData.scaling.replace(".00", "") : "2"
     const extra = Math.random() < 0.1 ? ";FBOP/80" : ""
 
-    // Use FBRV from database or generate random
-    let fbrv: number | string = appVersion.fbrv // Properly typed fbrv variable
-    if (!fbrv) {
-      // Fallback to random generation if no FBRV in database
-      fbrv = Math.floor(Math.random() * 999999) + 700000000
-    } else {
+    let fbrv: string | number = appVersion.fbrv ?? Math.floor(Math.random() * 999999) + 700000000
+
+    if (appVersion.fbrv !== null) {
       // Handle partial FBRV completion
       const fbrvStr = fbrv.toString()
       if (fbrvStr.length < 9) {
@@ -522,14 +530,22 @@ export class AccessKey extends BaseEntity {
     }
   }
 
-  // Store authenticated user
-  static setCurrentUser(user: any) {
+  static setCurrentUser(user: Record<string, any>) {
     if (typeof window !== "undefined") {
       localStorage.setItem("authenticated_user", JSON.stringify(user))
     }
   }
 
-  // Logout user
+  static isAdmin(user?: Record<string, any>) {
+    const currentUser = user || this.getCurrentUser()
+    return currentUser !== null // All authenticated users are admins
+  }
+
+  static canGenerate(user?: Record<string, any>) {
+    const currentUser = user || this.getCurrentUser()
+    return currentUser !== null // All authenticated users can generate unlimited
+  }
+
   static logout() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("authenticated_user")
@@ -537,22 +553,17 @@ export class AccessKey extends BaseEntity {
       window.location.href = "/login"
     }
   }
-
-  static isAdmin(user?: any) {
-    const currentUser = user || this.getCurrentUser()
-    return currentUser !== null // All authenticated users are admins
-  }
-
-  static canGenerate(user?: any) {
-    const currentUser = user || this.getCurrentUser()
-    return currentUser !== null // All authenticated users can generate unlimited
-  }
 }
 
 export class UserGeneration extends BaseEntity {
   static tableName = "user_generations"
 
-  static async createGeneration(accessKey: string, userName: string, generatedData: any, platform: string) {
+  static async createGeneration(
+    accessKey: string,
+    userName: string,
+    generatedData: Record<string, any>,
+    platform: string,
+  ) {
     if (!isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
