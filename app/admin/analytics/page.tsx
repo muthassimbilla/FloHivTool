@@ -32,6 +32,23 @@ interface AnalyticsData {
   }
 }
 
+interface User {
+  created_at: string
+  email: string
+  last_login: string | null
+}
+
+interface Generation {
+  created_at: string
+  platform: string
+  firebase_uid: string
+}
+
+interface Session {
+  login_time: string
+  firebase_uid: string
+}
+
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     userGrowth: [],
@@ -94,7 +111,7 @@ export default function AnalyticsPage() {
 
       // Process user growth data
       const userGrowthMap = new Map<string, number>()
-      users?.forEach((user) => {
+      users?.forEach((user: User) => {
         const date = new Date(user.created_at).toISOString().split("T")[0]
         userGrowthMap.set(date, (userGrowthMap.get(date) || 0) + 1)
       })
@@ -105,7 +122,7 @@ export default function AnalyticsPage() {
 
       // Process generation stats by platform
       const platformMap = new Map<string, number>()
-      generations?.forEach((gen) => {
+      generations?.forEach((gen: Generation) => {
         platformMap.set(gen.platform, (platformMap.get(gen.platform) || 0) + 1)
       })
 
@@ -116,13 +133,13 @@ export default function AnalyticsPage() {
       // Process daily activity
       const activityMap = new Map<string, { logins: number; generations: number }>()
 
-      sessions?.forEach((session) => {
+      sessions?.forEach((session: Session) => {
         const date = new Date(session.login_time).toISOString().split("T")[0]
         const current = activityMap.get(date) || { logins: 0, generations: 0 }
         activityMap.set(date, { ...current, logins: current.logins + 1 })
       })
 
-      generations?.forEach((gen) => {
+      generations?.forEach((gen: Generation) => {
         const date = new Date(gen.created_at).toISOString().split("T")[0]
         const current = activityMap.get(date) || { logins: 0, generations: 0 }
         activityMap.set(date, { ...current, generations: current.generations + 1 })
@@ -134,7 +151,7 @@ export default function AnalyticsPage() {
 
       // Process top users
       const userGenMap = new Map<string, number>()
-      generations?.forEach((gen) => {
+      generations?.forEach((gen: Generation) => {
         userGenMap.set(gen.firebase_uid, (userGenMap.get(gen.firebase_uid) || 0) + 1)
       })
 
