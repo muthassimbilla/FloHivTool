@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Loader2, Shield, Users, BarChart3, Bell } from "lucide-react"
+import { Loader2, Shield, Users, BarChart3, Bell, CreditCard } from "lucide-react"
 
 export default function HomePage() {
   const { user, loading } = useAuth()
@@ -60,6 +60,14 @@ export default function HomePage() {
                 <h1 className="text-2xl font-bold text-white">User Dashboard</h1>
               </div>
               <div className="flex items-center space-x-4">
+                <Button
+                  onClick={() => router.push("/pricing")}
+                  variant="outline"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Pricing
+                </Button>
                 <span className="text-blue-200">Welcome, {user.displayName || user.email}</span>
                 <Button
                   onClick={() => router.push("/logout")}
@@ -156,6 +164,14 @@ export default function HomePage() {
                     }}
                   >
                     View History
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
+                    onClick={() => router.push("/pricing")}
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    View Pricing Plans
                   </Button>
                 </div>
               </CardContent>
