@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
     formats: ['image/webp', 'image/avif'],
@@ -27,6 +27,9 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   output: 'standalone',
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
   async headers() {
     return [
       {

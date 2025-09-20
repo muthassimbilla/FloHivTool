@@ -166,7 +166,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         deleteNotification,
       }}
     >
-      <>{children}</>
+      {children}
     </NotificationContext.Provider>
   )
 }
