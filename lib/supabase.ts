@@ -340,7 +340,8 @@ export class User extends BaseEntity {
         window.location.reload()
       } catch (error) {
         console.error("Login failed:", error)
-        alert("Login failed: " + error.message)
+        const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
+        alert("Login failed: " + errorMessage)
       }
     }
   }
