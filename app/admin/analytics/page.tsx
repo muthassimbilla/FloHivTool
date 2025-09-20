@@ -54,6 +54,15 @@ interface TopUser {
   email: string
 }
 
+interface SortedTopUser {
+  email: string
+  generations: number
+}
+
+interface UserWithLogin {
+  last_login: string | null
+}
+
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     userGrowth: [],
@@ -177,7 +186,7 @@ export default function AnalyticsPage() {
             email: user.email,
             generations: userGenMap.get(user.firebase_uid) || 0,
           }))
-          .sort((a, b) => b.generations - a.generations) || []
+          .sort((a: SortedTopUser, b: SortedTopUser) => b.generations - a.generations) || []
 
       // Calculate system metrics
       const { data: allUsers } = await supabase.from("users").select("last_login")
@@ -185,7 +194,7 @@ export default function AnalyticsPage() {
 
       const totalUsers = allUsers?.length || 0
       const activeUsers =
-        allUsers?.filter((u) => {
+        allUsers?.filter((u: UserWithLogin) => {
           if (!u.last_login) return false
           const lastLogin = new Date(u.last_login)
           const thirtyDaysAgo = new Date()

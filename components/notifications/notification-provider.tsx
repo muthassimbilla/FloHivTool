@@ -17,6 +17,12 @@ interface Notification {
   action_url?: string
 }
 
+interface RealtimePayload {
+  new: Notification
+  old?: Notification
+  eventType: string
+}
+
 interface NotificationContextType {
   notifications: Notification[]
   unreadCount: number
@@ -72,7 +78,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           table: "notifications",
           filter: `user_id=eq.${user.uid}`,
         },
-        (payload) => {
+        (payload: RealtimePayload) => {
           const newNotification = payload.new as Notification
           setNotifications((prev) => [newNotification, ...prev])
 
@@ -92,7 +98,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           table: "notifications",
           filter: `user_id=eq.${user.uid}`,
         },
-        (payload) => {
+        (payload: RealtimePayload) => {
           const updatedNotification = payload.new as Notification
           setNotifications((prev) => prev.map((n) => (n.id === updatedNotification.id ? updatedNotification : n)))
         },

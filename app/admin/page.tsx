@@ -5,6 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/lib/supabase"
 import { Users, UserCheck, Clock, Activity, TrendingUp, AlertTriangle } from "lucide-react"
 
+interface User {
+  is_approved: boolean
+  created_at: string
+}
+
+interface Session {
+  login_time: string
+}
+
 interface DashboardStats {
   totalUsers: number
   pendingApprovals: number
@@ -37,13 +46,13 @@ export default function AdminDashboard() {
       const { data: sessions } = await supabase.from("user_sessions").select("login_time")
 
       const totalUsers = users?.length || 0
-      const pendingApprovals = users?.filter((u) => !u.is_approved).length || 0
-      const approvedUsers = users?.filter((u) => u.is_approved).length || 0
+      const pendingApprovals = users?.filter((u: User) => !u.is_approved).length || 0
+      const approvedUsers = users?.filter((u: User) => u.is_approved).length || 0
       const totalGenerations = generations?.length || 0
 
       // Calculate active today
       const today = new Date().toISOString().split("T")[0]
-      const activeToday = sessions?.filter((s) => s.login_time && s.login_time.startsWith(today)).length || 0
+      const activeToday = sessions?.filter((s: Session) => s.login_time && s.login_time.startsWith(today)).length || 0
 
       setStats({
         totalUsers,
