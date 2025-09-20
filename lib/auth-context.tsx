@@ -134,12 +134,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         console.log("[v0] Creating new user")
+
+        const { data: userCount, error: countError } = await supabase.from("users").select("id", { count: "exact" })
+
+        console.log("[v0] Current user count:", userCount?.length || 0)
+        console.log("[v0] Count error:", countError)
+
+        const isFirstUser = !userCount || userCount.length === 0
+        console.log("[v0] Is first user:", isFirstUser)
+
         const { data: newUser, error: insertError } = await supabase
           .from("users")
           .insert({
             ...userData,
-            is_approved: false,
-            role: "user",
+            is_approved: isFirstUser, // First user is auto-approved
+            role: isFirstUser ? "admin" : "user", // First user becomes admin
             created_at: new Date().toISOString(),
           })
           .select()
@@ -147,8 +156,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (insertError) {
           console.error("[v0] Error creating user:", insertError)
+          console.error("[v0] Insert error details:", JSON.stringify(insertError, null, 2))
         } else {
           console.log("[v0] New user created successfully:", newUser)
+          if (isFirstUser) {
+            console.log("[v0] First user created as admin!")
+          }
         }
       }
     } catch (error) {
@@ -201,10 +214,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error("Firebase authentication not configured")
     }
     console.log("[v0] Attempting sign up for:", email)
-    const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password)
-    if (firebaseUser) {
-      console.log("[v0] Sign up successful, sending verification email")
-      await sendEmailVerification(firebaseUser)
+
+    try {
+      const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password)
+      console.log("[v0] Firebase user created successfully:", firebaseUser.uid)
+
+      if (firebaseUser) {
+        console.log("[v0] Sign up successful, sending verification email")
+        await sendEmailVerification(firebaseUser)
+        console.log("[v0] Verification email sent")
+
+        console.log("[v0] Forcing immediate Supabase sync")
+        await syncUserWithSupabase(firebaseUser)
+        console.log("[v0] Supabase sync completed")
+      }
+    } catch (error) {
+      console.error("[v0] Sign up error:", error)
+      throw error
     }
   }
 
