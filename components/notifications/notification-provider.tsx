@@ -12,7 +12,7 @@ interface Notification {
   title: string
   message: string
   type: "info" | "success" | "warning" | "error"
-  read: boolean
+  is_read: boolean // Changed from 'read' to 'is_read' to match database schema
   created_at: string
   action_url?: string
 }
@@ -37,17 +37,33 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const [notifications, setNotifications] = useState<Notification[]>([])
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const unreadCount = notifications.filter((n) => !n.is_read).length // Updated to use is_read
 
   useEffect(() => {
     if (!user) return
 
     const loadNotifications = async () => {
       try {
+        if (!user.uid || typeof user.uid !== "string") {
+          console.warn("Invalid user ID for notifications")
+          return
+        }
+
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("firebase_uid", user.uid)
+          .single()
+
+        if (userError || !userData) {
+          console.warn("User not found in database:", user.uid)
+          return
+        }
+
         const { data, error } = await supabase
           .from("notifications")
           .select("*")
-          .eq("user_id", user.uid)
+          .eq("user_id", userData.id) // Use database UUID instead of Firebase UID
           .order("created_at", { ascending: false })
           .limit(50)
 
@@ -66,47 +82,75 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, [user])
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !user.uid) return
 
-    const channel = supabase
-      .channel("notifications")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.uid}`,
-        },
-        (payload: RealtimePayload) => {
-          const newNotification = payload.new as Notification
-          setNotifications((prev) => [newNotification, ...prev])
+    if (typeof user.uid !== "string") {
+      console.warn("Invalid user ID for realtime notifications")
+      return
+    }
 
-          // Show toast notification
-          toast({
-            title: newNotification.title,
-            description: newNotification.message,
-            duration: 5000,
-          })
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.uid}`,
-        },
-        (payload: RealtimePayload) => {
-          const updatedNotification = payload.new as Notification
-          setNotifications((prev) => prev.map((n) => (n.id === updatedNotification.id ? updatedNotification : n)))
-        },
-      )
-      .subscribe()
+    const setupRealtimeSubscription = async () => {
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("firebase_uid", user.uid)
+        .single()
+
+      if (userError || !userData) {
+        console.warn("User not found for realtime subscription:", user.uid)
+        return
+      }
+
+      const channel = supabase
+        .channel("notifications")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${userData.id}`, // Use database UUID
+          },
+          (payload: RealtimePayload) => {
+            const newNotification = payload.new as Notification
+            setNotifications((prev) => [newNotification, ...prev])
+
+            // Show toast notification
+            toast({
+              title: newNotification.title,
+              description: newNotification.message,
+              duration: 5000,
+            })
+          },
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${userData.id}`, // Use database UUID
+          },
+          (payload: RealtimePayload) => {
+            const updatedNotification = payload.new as Notification
+            setNotifications((prev) => prev.map((n) => (n.id === updatedNotification.id ? updatedNotification : n)))
+          },
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
+
+    let cleanup: (() => void) | undefined
+
+    setupRealtimeSubscription().then((cleanupFn) => {
+      cleanup = cleanupFn
+    })
 
     return () => {
-      supabase.removeChannel(channel)
+      if (cleanup) cleanup()
     }
   }, [user])
 
@@ -124,31 +168,47 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }
 
   const markAsRead = async (id: string) => {
-    const { error } = await supabase.from("notifications").update({ read: true }).eq("id", id)
+    const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id) // Updated to use is_read
 
     if (error) {
       console.error("Error marking notification as read:", error)
       return
     }
 
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))) // Updated to use is_read
   }
 
   const markAllAsRead = async () => {
-    if (!user) return
+    if (!user || !user.uid) return
+
+    if (typeof user.uid !== "string") {
+      console.warn("Invalid user ID for marking notifications as read")
+      return
+    }
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("firebase_uid", user.uid)
+      .single()
+
+    if (userError || !userData) {
+      console.warn("User not found for marking notifications as read:", user.uid)
+      return
+    }
 
     const { error } = await supabase
       .from("notifications")
-      .update({ read: true })
-      .eq("user_id", user.uid)
-      .eq("read", false)
+      .update({ is_read: true }) // Updated to use is_read
+      .eq("user_id", userData.id)
+      .eq("is_read", false) // Updated to use is_read
 
     if (error) {
       console.error("Error marking all notifications as read:", error)
       return
     }
 
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true }))) // Updated to use is_read
   }
 
   const deleteNotification = async (id: string) => {
