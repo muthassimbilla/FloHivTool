@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Shield, Users, BarChart3, Bell } from "lucide-react"
 
 export default function HomePage() {
-  const { user, loading, userProfile } = useAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -16,18 +16,18 @@ export default function HomePage() {
       if (!user) {
         // Not logged in, redirect to login
         router.push("/login")
-      } else if (userProfile?.status === "pending") {
+      } else if (!user.isApproved) {
         // User pending approval
         router.push("/pending-approval")
-      } else if (userProfile?.role === "admin") {
+      } else if (user.role === "admin") {
         // Admin user, redirect to admin panel
         router.push("/admin")
-      } else if (userProfile?.status === "approved") {
+      } else if (user.isApproved) {
         // Regular approved user, show user dashboard
         // For now, we'll show a simple dashboard here
       }
     }
-  }, [user, loading, userProfile, router])
+  }, [user, loading, router])
 
   if (loading) {
     return (
@@ -42,7 +42,7 @@ export default function HomePage() {
     )
   }
 
-  if (user && userProfile?.status === "approved" && userProfile?.role !== "admin") {
+  if (user && user.isApproved && user.role !== "admin") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
         {/* Header */}
@@ -54,7 +54,7 @@ export default function HomePage() {
                 <h1 className="text-2xl font-bold text-white">User Dashboard</h1>
               </div>
               <div className="flex items-center space-x-4">
-                <span className="text-blue-200">Welcome, {userProfile.full_name || user.email}</span>
+                <span className="text-blue-200">Welcome, {user.displayName || user.email}</span>
                 <Button
                   onClick={() => router.push("/logout")}
                   variant="outline"
@@ -81,7 +81,7 @@ export default function HomePage() {
               <CardContent className="text-blue-100">
                 <div className="space-y-2">
                   <p>
-                    <strong>Name:</strong> {userProfile.full_name || "Not provided"}
+                    <strong>Name:</strong> {user.displayName || "Not provided"}
                   </p>
                   <p>
                     <strong>Email:</strong> {user.email}
@@ -90,10 +90,10 @@ export default function HomePage() {
                     <strong>Status:</strong> <span className="text-green-400">Approved</span>
                   </p>
                   <p>
-                    <strong>Daily Limit:</strong> {userProfile.daily_limit || 100}
+                    <strong>Daily Limit:</strong> {user.userAgentLimit || 100}
                   </p>
                   <p>
-                    <strong>Monthly Limit:</strong> {userProfile.monthly_limit || 1000}
+                    <strong>Monthly Limit:</strong> {user.customLimit ? "Unlimited" : "1000"}
                   </p>
                 </div>
               </CardContent>
@@ -110,10 +110,10 @@ export default function HomePage() {
               <CardContent className="text-blue-100">
                 <div className="space-y-2">
                   <p>
-                    <strong>Today:</strong> 0 / {userProfile.daily_limit || 100}
+                    <strong>Today:</strong> 0 / {user.userAgentLimit || 100}
                   </p>
                   <p>
-                    <strong>This Month:</strong> 0 / {userProfile.monthly_limit || 1000}
+                    <strong>This Month:</strong> 0 / {user.customLimit ? "Unlimited" : "1000"}
                   </p>
                   <p>
                     <strong>Total Generated:</strong> 0
