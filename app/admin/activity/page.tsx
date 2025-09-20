@@ -20,6 +20,17 @@ interface ActivityLog {
   target_email: string | null
 }
 
+interface AdminAction {
+  id: string
+  action_type: string
+  target_user_id: string | null
+  action_details: any
+  created_at: string
+  admin_id: string
+  admin?: { email: string }
+  target_user?: { email: string }
+}
+
 export default function ActivityPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,7 +77,7 @@ export default function ActivityPage() {
       if (error) throw error
 
       const formattedLogs: ActivityLog[] =
-        adminActions?.map((action) => ({
+        adminActions?.map((action: AdminAction) => ({
           id: action.id,
           action_type: action.action_type,
           target_user_id: action.target_user_id,
