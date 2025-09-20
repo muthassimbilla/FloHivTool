@@ -27,9 +27,16 @@ interface Notification {
   }
 }
 
+interface User {
+  id: string
+  email: string
+  full_name: string
+  status: string
+}
+
 export default function NotificationsPage() {
-  const [users, setUsers] = useState([])
-  const [notifications, setNotifications] = useState([])
+  const [users, setUsers] = useState<User[]>([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     recipient: "all",
@@ -90,7 +97,7 @@ export default function NotificationsPage() {
     setLoading(true)
 
     try {
-      let targetUsers = []
+      let targetUsers: string[] = []
 
       if (formData.recipient === "all") {
         targetUsers = users.map((u) => u.id)
@@ -216,10 +223,7 @@ export default function NotificationsPage() {
                     </div>
                   </SelectItem>
                   <SelectItem value="specific">
-                    <div className="flex items-center gap-2">
-                      {/* User icon removed to avoid redeclaration */}
-                      Specific User
-                    </div>
+                    <div className="flex items-center gap-2">Specific User</div>
                   </SelectItem>
                 </SelectContent>
               </Select>
