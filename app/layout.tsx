@@ -14,8 +14,17 @@ const inter = Inter({
   fallback: ["system-ui", "arial"],
 })
 
+const getSiteUrl = () => {
+  const siteUrl = process.env.SITE_URL || process.env.VERCEL_URL || "flohivtool.vercel.app"
+  // Ensure protocol is included
+  if (siteUrl.startsWith("http://") || siteUrl.startsWith("https://")) {
+    return siteUrl
+  }
+  return `https://${siteUrl}`
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL || "https://flohivtool.vercel.app"),
+  metadataBase: new URL(getSiteUrl()),
   title: "UAGen Pro - Professional User Agent Generator for iOS & Samsung",
   description:
     "Generate thousands of unique, professional-grade iOS and Samsung user agents for Instagram and Facebook. Fast, secure, and reliable user agent generation tool.",
@@ -41,7 +50,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: process.env.SITE_URL || "https://flohivtool.vercel.app",
+    url: getSiteUrl(),
     siteName: "UAGen Pro",
     title: "UAGen Pro - Professional User Agent Generator",
     description:
