@@ -1,22 +1,28 @@
 import { createClient } from "@supabase/supabase-js"
+import { env } from "./env"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Only create client if both URL and key are available
-export const supabase =
-  supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: true,
-        },
-      })
-    : null
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: "pkce",
+  },
+  db: {
+    schema: "public",
+  },
+  global: {
+    headers: {
+      "x-application-name": "user-agent-generator",
+    },
+  },
+})
 
 export const isSupabaseAvailable = () => {
-  return supabase !== null && supabaseUrl && supabaseAnonKey
+  return Boolean(supabaseUrl && supabaseAnonKey)
 }
 
 // Database entity classes
