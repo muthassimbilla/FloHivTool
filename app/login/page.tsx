@@ -27,9 +27,12 @@ export default function LoginPage() {
     setError("")
 
     try {
+      console.log("[v0] Starting login process")
       await signIn(email, password)
-      router.push("/dashboard")
+      console.log("[v0] Login successful, redirecting to dashboard")
+      router.replace("/dashboard")
     } catch (error: any) {
+      console.error("[v0] Login error:", error)
       setError(error.message || "Login failed")
     } finally {
       setLoading(false)
@@ -41,9 +44,12 @@ export default function LoginPage() {
     setError("")
 
     try {
+      console.log("[v0] Starting Google login")
       await signInWithGoogle()
-      router.push("/dashboard")
+      console.log("[v0] Google login successful, redirecting")
+      router.replace("/dashboard")
     } catch (error: any) {
+      console.error("[v0] Google login error:", error)
       setError(error.message || "Google login failed")
     } finally {
       setLoading(false)

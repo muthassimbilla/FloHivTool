@@ -12,18 +12,24 @@ export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
+    console.log("[v0] HomePage useEffect - user:", user, "loading:", loading)
+
     if (!loading) {
       if (!user) {
         // Not logged in, redirect to login
-        router.push("/login")
+        console.log("[v0] No user, redirecting to login")
+        router.replace("/login")
       } else if (!user.isApproved) {
         // User pending approval
-        router.push("/pending-approval")
+        console.log("[v0] User not approved, redirecting to pending approval")
+        router.replace("/pending-approval")
       } else if (user.role === "admin") {
         // Admin user, redirect to admin panel
-        router.push("/admin")
+        console.log("[v0] Admin user, redirecting to admin")
+        router.replace("/admin")
       } else if (user.isApproved) {
         // Regular approved user, show user dashboard
+        console.log("[v0] Approved user, staying on dashboard")
         // For now, we'll show a simple dashboard here
       }
     }

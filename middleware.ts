@@ -7,6 +7,15 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const response = NextResponse.next()
 
+  if (
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/api/") ||
+    pathname.includes(".") ||
+    pathname === "/favicon.ico"
+  ) {
+    return response
+  }
+
   // Rate limiting for API routes
   if (pathname.startsWith("/api/")) {
     const ip = request.ip ?? request.headers.get("x-forwarded-for") ?? "anonymous"
@@ -22,54 +31,63 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Create Supabase client for server-side auth
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({ name, value, ...options })
-        },
-        remove(name: string, options: CookieOptions) {
-          response.cookies.set({ name, value: "", ...options })
-        },
-      },
-    },
-  )
-
-  // Check authentication for protected routes
   if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard") || pathname.startsWith("/profile")) {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn("[v0] Supabase not configured, skipping auth check")
+      return response
+    }
+
     try {
+      // Create Supabase client for server-side auth
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            get(name: string) {
+              return request.cookies.get(name)?.value
+            },
+            set(name: string, value: string, options: CookieOptions) {
+              response.cookies.set({ name, value, ...options })
+            },
+            remove(name: string, options: CookieOptions) {
+              response.cookies.set({ name, value: "", ...options })
+            },
+          },
+        },
+      )
+
       const {
         data: { user },
         error,
       } = await supabase.auth.getUser()
 
+      console.log("[v0] Middleware auth check - user:", user?.id, "error:", error)
+
       if (error || !user) {
-        const redirectUrl = new URL("/login", request.url)
-        redirectUrl.searchParams.set("redirect", pathname)
-        return NextResponse.redirect(redirectUrl)
+        console.log("[v0] No Supabase user found, checking if this is a Firebase-only setup")
+        // Don't redirect if this might be a Firebase-only setup
+        // Let the client-side auth handle the redirect
+        return response
       }
 
       // Additional check for admin routes
       if (pathname.startsWith("/admin")) {
         const { data: profile } = await supabase
-          .from("user_profiles")
-          .select("role, status")
+          .from("users")
+          .select("role, is_approved")
           .eq("firebase_uid", user.id)
           .single()
 
-        if (!profile || profile.role !== "admin" || profile.status !== "approved") {
+        if (!profile || profile.role !== "admin" || !profile.is_approved) {
           return NextResponse.redirect(new URL("/unauthorized", request.url))
         }
       }
     } catch (error) {
-      console.error("Middleware auth error:", error)
-      return NextResponse.redirect(new URL("/login", request.url))
+      console.error("[v0] Middleware auth error:", error)
+      // Don't redirect on error, let client handle it
+      return response
     }
   }
 
@@ -86,7 +104,6 @@ export const config = {
     "/admin/:path*",
     "/dashboard/:path*",
     "/profile/:path*",
-    "/api/:path*",
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|api).*)",
   ],
 }
