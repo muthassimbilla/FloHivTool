@@ -56,9 +56,22 @@ ${message}
     if (!response.ok) {
       const errorData = await response.text()
       console.error("[v0] Telegram API error:", errorData)
+
+      let errorMessage = `Telegram API error: ${response.status}. ${errorData}`
+
+      if (errorData.includes("chat not found")) {
+        errorMessage =
+          "Telegram chat not found. Please check: 1) TELEGRAM_CHAT_ID is correct, 2) Bot has been added to the chat/channel, 3) Bot has permission to send messages. Get your chat ID by messaging @userinfobot or @chatid_echo_bot"
+      } else if (errorData.includes("Unauthorized")) {
+        errorMessage = "Telegram bot token is invalid. Please check your TELEGRAM_BOT_TOKEN environment variable."
+      } else if (errorData.includes("Forbidden")) {
+        errorMessage =
+          "Bot doesn't have permission to send messages to this chat. Please add the bot to the chat and give it admin permissions."
+      }
+
       return NextResponse.json(
         {
-          error: `Telegram API error: ${response.status}. ${errorData}`,
+          error: errorMessage,
         },
         { status: 500 },
       )
