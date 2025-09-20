@@ -28,29 +28,8 @@ interface AuthUser {
   customLimit?: boolean
 }
 
-interface UserProfile {
-  id: string
-  firebase_uid: string
-  email: string
-  display_name: string | null
-  email_verified: boolean
-  is_approved: boolean
-  role: string
-  user_agent_limit: number
-  custom_limit: boolean
-  subscription_end_date: string | null
-  subscription_type: string
-  last_login: string | null
-  created_at: string
-  status: "pending" | "approved" | "rejected"
-  full_name: string | null
-  daily_limit: number
-  monthly_limit: number
-}
-
 interface AuthContextType {
   user: AuthUser | null
-  userProfile: UserProfile | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
@@ -64,30 +43,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
-
-  const convertToUserProfile = (supabaseUser: any): UserProfile => {
-    return {
-      id: supabaseUser.id,
-      firebase_uid: supabaseUser.firebase_uid,
-      email: supabaseUser.email,
-      display_name: supabaseUser.display_name,
-      email_verified: supabaseUser.email_verified,
-      is_approved: supabaseUser.is_approved,
-      role: supabaseUser.role,
-      user_agent_limit: supabaseUser.user_agent_limit || 100,
-      custom_limit: supabaseUser.custom_limit || false,
-      subscription_end_date: supabaseUser.subscription_end_date,
-      subscription_type: supabaseUser.subscription_type || '7_days',
-      last_login: supabaseUser.last_login,
-      created_at: supabaseUser.created_at,
-      status: supabaseUser.is_approved ? "approved" : "pending",
-      full_name: supabaseUser.display_name,
-      daily_limit: supabaseUser.user_agent_limit || 100,
-      monthly_limit: (supabaseUser.user_agent_limit || 100) * 30, // Calculate monthly limit
-    }
-  }
 
   const convertToAuthUser = async (firebaseUser: FirebaseUser): Promise<AuthUser> => {
     // Get user data from Supabase
@@ -146,28 +102,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await syncUserWithSupabase(firebaseUser)
           const authUser = await convertToAuthUser(firebaseUser)
           setUser(authUser)
-          
-          // Get user profile data from Supabase
-          const { data: supabaseUser } = await supabase
-            .from("users")
-            .select("*")
-            .eq("firebase_uid", firebaseUser.uid)
-            .single()
-          
-          if (supabaseUser) {
-            const profile = convertToUserProfile(supabaseUser)
-            setUserProfile(profile)
-          } else {
-            setUserProfile(null)
-          }
         } catch (error) {
           console.error("Error syncing user:", error)
           setUser(null)
-          setUserProfile(null)
         }
       } else {
         setUser(null)
-        setUserProfile(null)
       }
       setLoading(false)
     })
@@ -207,7 +147,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     user,
-    userProfile,
     loading,
     signIn,
     signUp,

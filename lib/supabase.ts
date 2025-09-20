@@ -340,8 +340,7 @@ export class User extends BaseEntity {
         window.location.reload()
       } catch (error) {
         console.error("Login failed:", error)
-        const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
-        alert("Login failed: " + errorMessage)
+        alert("Login failed: " + error.message)
       }
     }
   }
@@ -387,7 +386,7 @@ async function generateUserAgent() {
   const appVersion = {
     version: "324.0",
     build_number: "123456789",
-    fbrv: null, // This should be fetched from the database
+    fbrv: null as number | null, // Added proper typing for fbrv
   }
   const device = {
     model_name: "iPhone 12",
@@ -414,7 +413,7 @@ async function generateUserAgent() {
     const extra = Math.random() < 0.1 ? ";FBOP/80" : ""
 
     // Use FBRV from database or generate random
-    let fbrv = appVersion.fbrv
+    let fbrv: number | string = appVersion.fbrv // Properly typed fbrv variable
     if (!fbrv) {
       // Fallback to random generation if no FBRV in database
       fbrv = Math.floor(Math.random() * 999999) + 700000000

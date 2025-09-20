@@ -8,7 +8,7 @@ export function Toaster() {
   const { toasts } = useToast()
 
   // Icon mapping for different toast types
-  const getToastIcon = (variant: string | null) => {
+  const getToastIcon = (variant: string) => {
     switch (variant) {
       case "success":
         return <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 drop-shadow-sm" />
