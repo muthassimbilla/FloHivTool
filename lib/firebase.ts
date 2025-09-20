@@ -3,7 +3,15 @@ import { getAuth } from "firebase/auth"
 import { env } from "./env"
 
 const isFirebaseConfigured = () => {
-  return !!(
+  console.log("[v0] Firebase environment variables check:")
+  console.log("[v0] API_KEY:", !!env.NEXT_PUBLIC_FIREBASE_API_KEY)
+  console.log("[v0] AUTH_DOMAIN:", !!env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN)
+  console.log("[v0] PROJECT_ID:", !!env.NEXT_PUBLIC_FIREBASE_PROJECT_ID)
+  console.log("[v0] STORAGE_BUCKET:", !!env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET)
+  console.log("[v0] MESSAGING_SENDER_ID:", !!env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID)
+  console.log("[v0] APP_ID:", !!env.NEXT_PUBLIC_FIREBASE_APP_ID)
+
+  const configured = !!(
     env.NEXT_PUBLIC_FIREBASE_API_KEY &&
     env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN &&
     env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
@@ -11,6 +19,9 @@ const isFirebaseConfigured = () => {
     env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID &&
     env.NEXT_PUBLIC_FIREBASE_APP_ID
   )
+
+  console.log("[v0] Firebase configured:", configured)
+  return configured
 }
 
 let app: any = null
@@ -33,14 +44,14 @@ if (isFirebaseConfigured()) {
     // Initialize Firebase Auth
     auth = getAuth(app)
 
-    console.log("Firebase initialized successfully")
+    console.log("[v0] Firebase initialized successfully")
   } catch (error) {
-    console.error("Failed to initialize Firebase:", error)
+    console.error("[v0] Failed to initialize Firebase:", error)
     app = null
     auth = null
   }
 } else {
-  console.warn("Firebase configuration not available - Firebase features will be disabled")
+  console.warn("[v0] Firebase configuration not available - Firebase features will be disabled")
 }
 
 export { auth }
