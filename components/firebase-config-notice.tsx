@@ -2,9 +2,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ExternalLink, Settings } from "lucide-react"
+import { ExternalLink, Settings, AlertTriangle } from "lucide-react"
 
 export function FirebaseConfigNotice() {
+  const isProduction = process.env.NODE_ENV === "production"
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
@@ -18,10 +20,20 @@ export function FirebaseConfigNotice() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {isProduction && (
+            <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-800 dark:text-red-200">
+                <strong>Production Deployment Issue:</strong> Firebase environment variables are missing in your Vercel
+                deployment. You need to add them in your Vercel project settings and redeploy.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Alert>
             <AlertDescription>
-              To enable Firebase authentication, you need to add the following environment variables to your Vercel
-              project:
+              To enable Firebase authentication, you need to add the following environment variables to your{" "}
+              {isProduction ? "Vercel project" : "development environment"}:
             </AlertDescription>
           </Alert>
 
@@ -38,13 +50,33 @@ export function FirebaseConfigNotice() {
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-semibold">How to add environment variables:</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm">
-              <li>Go to your Vercel project dashboard</li>
-              <li>Navigate to Settings → Environment Variables</li>
-              <li>Add each Firebase environment variable</li>
-              <li>Redeploy your application</li>
-            </ol>
+            <h3 className="font-semibold">
+              {isProduction ? "How to fix in Vercel deployment:" : "How to add environment variables:"}
+            </h3>
+            {isProduction ? (
+              <ol className="list-decimal list-inside space-y-1 text-sm">
+                <li>
+                  Go to your <strong>Vercel project dashboard</strong>
+                </li>
+                <li>
+                  Navigate to <strong>Settings → Environment Variables</strong>
+                </li>
+                <li>Add each Firebase environment variable with their values</li>
+                <li>
+                  <strong>Redeploy your application</strong> (important step!)
+                </li>
+                <li>Wait for the new deployment to complete</li>
+              </ol>
+            ) : (
+              <ol className="list-decimal list-inside space-y-1 text-sm">
+                <li>
+                  Create a <code>.env.local</code> file in your project root
+                </li>
+                <li>Add each Firebase environment variable</li>
+                <li>Restart your development server</li>
+                <li>For production, add them to Vercel project settings</li>
+              </ol>
+            )}
           </div>
 
           <Alert>
@@ -61,6 +93,23 @@ export function FirebaseConfigNotice() {
               </a>
             </AlertDescription>
           </Alert>
+
+          {isProduction && (
+            <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+              <AlertDescription className="text-blue-800 dark:text-blue-200">
+                <strong>Quick Fix:</strong> Go directly to your{" "}
+                <a
+                  href="https://vercel.com/dashboard"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:no-underline"
+                >
+                  Vercel Dashboard
+                </a>{" "}
+                → Select your project → Settings → Environment Variables
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>
