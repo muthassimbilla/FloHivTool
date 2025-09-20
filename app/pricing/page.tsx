@@ -79,6 +79,8 @@ export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false)
 
   const handlePurchase = async (plan: PricingPlan) => {
+    console.log("[v0] Purchase attempt for plan:", plan.name)
+
     const message = `🛒 New Purchase Request
     
 Plan: ${plan.name}
@@ -88,6 +90,8 @@ Features: ${plan.features.join(", ")}
 Customer wants to purchase this plan. Please contact them for payment processing.`
 
     try {
+      console.log("[v0] Sending request to /api/telegram")
+
       const response = await fetch("/api/telegram", {
         method: "POST",
         headers: {
@@ -100,14 +104,25 @@ Customer wants to purchase this plan. Please contact them for payment processing
         }),
       })
 
+      console.log("[v0] Response status:", response.status)
+
       if (response.ok) {
+        const result = await response.json()
+        console.log("[v0] Success response:", result)
         alert("আপনার অর্ডার পাঠানো হয়েছে! আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।")
       } else {
-        alert("কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।")
+        const errorData = await response.json()
+        console.error("[v0] API Error:", errorData)
+
+        if (errorData.error === "Telegram integration not configured") {
+          alert("Telegram integration সেটআপ করা হয়নি। Admin এর সাথে যোগাযোগ করুন।")
+        } else {
+          alert(`কিছু সমস্যা হয়েছে: ${errorData.error || "Unknown error"}`)
+        }
       }
     } catch (error) {
-      console.error("Error sending to Telegram:", error)
-      alert("কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।")
+      console.error("[v0] Network error:", error)
+      alert("নেটওয়ার্ক সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করুন এবং আবার চেষ্টা করুন।")
     }
   }
 
