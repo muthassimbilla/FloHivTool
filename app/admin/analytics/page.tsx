@@ -49,6 +49,11 @@ interface Session {
   firebase_uid: string
 }
 
+interface TopUser {
+  firebase_uid: string
+  email: string
+}
+
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     userGrowth: [],
@@ -168,7 +173,7 @@ export default function AnalyticsPage() {
 
       const topUsers =
         topUserData
-          ?.map((user) => ({
+          ?.map((user: TopUser) => ({
             email: user.email,
             generations: userGenMap.get(user.firebase_uid) || 0,
           }))
