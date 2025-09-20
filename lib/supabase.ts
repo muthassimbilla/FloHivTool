@@ -1,28 +1,40 @@
 import { createClient } from "@supabase/supabase-js"
 import { env } from "./env"
 
-const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const isSupabaseConfigured = () => {
+  return !!(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: "pkce",
-  },
-  db: {
-    schema: "public",
-  },
-  global: {
-    headers: {
-      "x-application-name": "user-agent-generator",
+let supabase: any = null
+
+if (isSupabaseConfigured()) {
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+  supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      flowType: "pkce",
     },
-  },
-})
+    db: {
+      schema: "public",
+    },
+    global: {
+      headers: {
+        "x-application-name": "user-agent-generator",
+      },
+    },
+  })
+} else {
+  console.warn("Supabase configuration not available - database features will be disabled")
+}
+
+export { supabase }
 
 export const isSupabaseAvailable = () => {
-  return Boolean(supabaseUrl && supabaseAnonKey)
+  return isSupabaseConfigured() && supabase !== null
 }
 
 interface DatabaseRecord {
