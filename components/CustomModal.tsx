@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 
+interface Particle {
+  id: number
+  x: number
+  y: number
+  delay: number
+}
+
 interface CustomModalProps {
   isOpen: boolean
   onClose: () => void
@@ -74,7 +81,7 @@ export default function CustomModal({
 }: CustomModalProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
-  const [particles, setParticles] = useState([])
+  const [particles, setParticles] = useState<Particle[]>([])
   const Icon = iconMap[type]
 
   useEffect(() => {
