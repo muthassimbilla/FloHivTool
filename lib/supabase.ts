@@ -1,15 +1,14 @@
 import { createClient } from "@supabase/supabase-js"
-import { env } from "./env"
 
 const isSupabaseConfigured = () => {
-  return !!(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 }
 
 let supabase: any = null
 
 if (isSupabaseConfigured()) {
-  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
   try {
     supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -35,6 +34,7 @@ if (isSupabaseConfigured()) {
   }
 } else {
   console.warn("Supabase configuration not available - database features will be disabled")
+  console.warn("Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables")
 }
 
 export { supabase }

@@ -42,10 +42,25 @@ export default function RegisterPage() {
     }
 
     try {
+      console.log("[v0] Starting registration process for:", email)
       await signUp(email, password)
+      console.log("[v0] Registration completed successfully")
       setSuccess(true)
     } catch (error: any) {
-      setError(error.message || "Registration failed")
+      console.error("[v0] Registration failed:", error)
+      let errorMessage = "Registration failed"
+
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "This email is already registered. Please use a different email or try logging in."
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password is too weak. Please use a stronger password."
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Please enter a valid email address."
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -81,9 +96,12 @@ export default function RegisterPage() {
                 verify your account.
               </AlertDescription>
             </Alert>
-            <p className="text-sm text-muted-foreground text-center">
-              After verification, your account will be pending admin approval.
-            </p>
+            <div className="text-sm text-muted-foreground text-center space-y-2">
+              <p>After verification, your account will be pending admin approval.</p>
+              <p className="text-xs text-orange-600">
+                Note: If Supabase is not configured, user data will only be stored in Firebase.
+              </p>
+            </div>
           </CardContent>
           <CardFooter>
             <Button asChild className="w-full">
@@ -133,11 +151,12 @@ export default function RegisterPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Create a password"
+                  placeholder="Create a password (min 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
                   required
+                  minLength={6}
                 />
               </div>
             </div>

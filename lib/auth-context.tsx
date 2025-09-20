@@ -99,32 +99,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!supabase) {
       console.warn("[v0] Supabase not available, skipping sync")
+      console.warn("[v0] Please configure Supabase integration to save user data")
       return
-    }
-
-    const userData = {
-      firebase_uid: firebaseUser.uid,
-      email: firebaseUser.email,
-      display_name: firebaseUser.displayName,
-      email_verified: firebaseUser.emailVerified,
-      last_login: new Date().toISOString(),
     }
 
     try {
       const { data: existingUser, error: selectError } = await supabase
         .from("users")
-        .select("*")
+        .select(
+          "id, firebase_uid, email, display_name, email_verified, is_approved, role, user_agent_limit, custom_limit, subscription_type, last_login",
+        )
         .eq("firebase_uid", firebaseUser.uid)
-        .single()
+        .maybeSingle()
 
       console.log("[v0] Existing user check:", existingUser)
       console.log("[v0] Select error:", selectError)
 
+      if (selectError && selectError.code !== "PGRST116") {
+        console.error("[v0] Error checking existing user:", selectError)
+        return
+      }
+
       if (existingUser) {
         console.log("[v0] Updating existing user")
+        const updateData = {
+          email: firebaseUser.email,
+          display_name: firebaseUser.displayName,
+          email_verified: firebaseUser.emailVerified,
+          last_login: new Date().toISOString(),
+        }
+
         const { error: updateError } = await supabase
           .from("users")
-          .update(userData)
+          .update(updateData)
           .eq("firebase_uid", firebaseUser.uid)
 
         if (updateError) {
@@ -135,30 +142,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         console.log("[v0] Creating new user")
 
-        const { data: userCount, error: countError } = await supabase.from("users").select("id", { count: "exact" })
+        const { count, error: countError } = await supabase.from("users").select("*", { count: "exact", head: true })
 
-        console.log("[v0] Current user count:", userCount?.length || 0)
+        console.log("[v0] Current user count:", count)
         console.log("[v0] Count error:", countError)
 
-        const isFirstUser = !userCount || userCount.length === 0
+        const isFirstUser = count === 0
         console.log("[v0] Is first user:", isFirstUser)
 
-        const { data: newUser, error: insertError } = await supabase
-          .from("users")
-          .insert({
-            ...userData,
-            is_approved: isFirstUser, // First user is auto-approved
-            role: isFirstUser ? "admin" : "user", // First user becomes admin
-            created_at: new Date().toISOString(),
-          })
-          .select()
-          .single()
+        const insertData = {
+          firebase_uid: firebaseUser.uid,
+          email: firebaseUser.email || "",
+          display_name: firebaseUser.displayName,
+          email_verified: firebaseUser.emailVerified,
+          is_approved: isFirstUser,
+          role: isFirstUser ? "admin" : "user",
+          user_agent_limit: 100,
+          custom_limit: false,
+          subscription_type: "7_days",
+          last_login: new Date().toISOString(),
+        }
+
+        console.log("[v0] Insert data:", JSON.stringify(insertData, null, 2))
+
+        const { error: insertError } = await supabase.from("users").insert(insertData)
 
         if (insertError) {
-          console.error("[v0] Error creating user:", insertError)
+          console.error("[v0] Error creating user:", insertError.message)
           console.error("[v0] Insert error details:", JSON.stringify(insertError, null, 2))
+
+          if (insertError.code === "23505") {
+            console.log("[v0] Duplicate key detected, trying update instead")
+            const { error: updateError } = await supabase
+              .from("users")
+              .update({
+                email: firebaseUser.email || "",
+                display_name: firebaseUser.displayName,
+                email_verified: firebaseUser.emailVerified,
+                last_login: new Date().toISOString(),
+              })
+              .eq("firebase_uid", firebaseUser.uid)
+
+            if (updateError) {
+              console.error("[v0] Error updating duplicate user:", updateError)
+            } else {
+              console.log("[v0] Duplicate user updated successfully")
+            }
+          }
         } else {
-          console.log("[v0] New user created successfully:", newUser)
+          console.log("[v0] New user created successfully")
           if (isFirstUser) {
             console.log("[v0] First user created as admin!")
           }
@@ -225,8 +257,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("[v0] Verification email sent")
 
         console.log("[v0] Forcing immediate Supabase sync")
-        await syncUserWithSupabase(firebaseUser)
-        console.log("[v0] Supabase sync completed")
+        if (supabase) {
+          await syncUserWithSupabase(firebaseUser)
+          console.log("[v0] Supabase sync completed")
+        } else {
+          console.warn("[v0] Supabase not configured - user data will not be saved to database")
+          console.warn("[v0] Please add Supabase integration to save user information")
+        }
       }
     } catch (error) {
       console.error("[v0] Sign up error:", error)
