@@ -180,9 +180,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error("Firebase authentication not configured")
     }
     console.log("[v0] Attempting sign in for:", email)
-    const result = await signInWithEmailAndPassword(auth, email, password)
-    console.log("[v0] Sign in successful:", result.user.uid)
-    return result
+    await signInWithEmailAndPassword(auth, email, password)
+    console.log("[v0] Sign in successful")
   }
 
   const signUp = async (email: string, password: string) => {
@@ -195,7 +194,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("[v0] Sign up successful, sending verification email")
       await sendEmailVerification(firebaseUser)
     }
-    return firebaseUser
   }
 
   const signInWithGoogle = async () => {
