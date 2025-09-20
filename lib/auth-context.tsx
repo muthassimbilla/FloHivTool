@@ -96,6 +96,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    if (!auth) {
+      console.warn("Firebase auth not initialized - authentication features disabled")
+      setLoading(false)
+      return
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -116,10 +122,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error("Firebase authentication not configured")
+    }
     await signInWithEmailAndPassword(auth, email, password)
   }
 
   const signUp = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error("Firebase authentication not configured")
+    }
     const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password)
     if (firebaseUser) {
       await sendEmailVerification(firebaseUser)
@@ -127,22 +139,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithGoogle = async () => {
+    if (!auth) {
+      throw new Error("Firebase authentication not configured")
+    }
     const provider = new GoogleAuthProvider()
     await signInWithPopup(auth, provider)
   }
 
   const logout = async () => {
+    if (!auth) {
+      throw new Error("Firebase authentication not configured")
+    }
     await signOut(auth)
   }
 
   const resetPassword = async (email: string) => {
+    if (!auth) {
+      throw new Error("Firebase authentication not configured")
+    }
     await sendPasswordResetEmail(auth, email)
   }
 
   const resendVerification = async () => {
-    if (auth.currentUser) {
-      await sendEmailVerification(auth.currentUser)
+    if (!auth || !auth.currentUser) {
+      throw new Error("Firebase authentication not configured or user not logged in")
     }
+    await sendEmailVerification(auth.currentUser)
   }
 
   const value = {
