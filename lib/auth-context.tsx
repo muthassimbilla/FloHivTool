@@ -48,6 +48,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const convertToAuthUser = async (firebaseUser: FirebaseUser): Promise<AuthUser> => {
     console.log("[v0] Converting Firebase user to AuthUser:", firebaseUser.uid)
 
+    if (!supabase) {
+      console.warn("[v0] Supabase not available, returning basic user data")
+      return {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        emailVerified: firebaseUser.emailVerified,
+        displayName: firebaseUser.displayName,
+        isApproved: false,
+        role: "user",
+      }
+    }
+
     try {
       const { data: supabaseUser, error } = await supabase
         .from("users")

@@ -11,22 +11,28 @@ if (isSupabaseConfigured()) {
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-  supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-      flowType: "pkce",
-    },
-    db: {
-      schema: "public",
-    },
-    global: {
-      headers: {
-        "x-application-name": "user-agent-generator",
+  try {
+    supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: "pkce",
       },
-    },
-  })
+      db: {
+        schema: "public",
+      },
+      global: {
+        headers: {
+          "x-application-name": "user-agent-generator",
+        },
+      },
+    })
+    console.log("[v0] Supabase client created successfully")
+  } catch (error) {
+    console.error("[v0] Failed to create Supabase client:", error)
+    supabase = null
+  }
 } else {
   console.warn("Supabase configuration not available - database features will be disabled")
 }
@@ -53,48 +59,58 @@ export class BaseEntity {
   static tableName = ""
 
   static async list(orderBy = "id", limit = 100) {
-    if (!isSupabaseAvailable()) {
+    if (!isSupabaseAvailable() || !supabase) {
       console.warn(`Supabase not available for ${this.tableName}`)
       return []
     }
 
     console.log(`Fetching data from ${this.tableName} with limit ${limit}...`)
 
-    const { data, error } = await supabase!
-      .from(this.tableName)
-      .select("*")
-      .order(orderBy.startsWith("-") ? orderBy.slice(1) : orderBy, {
-        ascending: !orderBy.startsWith("-"),
-      })
-      .limit(limit) // Added limit to prevent fetching all records
+    try {
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select("*")
+        .order(orderBy.startsWith("-") ? orderBy.slice(1) : orderBy, {
+          ascending: !orderBy.startsWith("-"),
+        })
+        .limit(limit) // Added limit to prevent fetching all records
 
-    console.log(`${this.tableName} data:`, data)
-    console.log(`${this.tableName} error:`, error)
+      console.log(`${this.tableName} data:`, data)
+      console.log(`${this.tableName} error:`, error)
 
-    if (error) {
-      console.error(`Error fetching ${this.tableName}:`, error)
-      throw error
+      if (error) {
+        console.error(`Error fetching ${this.tableName}:`, error)
+        throw error
+      }
+      return data || []
+    } catch (error) {
+      console.error(`Database operation failed for ${this.tableName}:`, error)
+      return []
     }
-    return data || []
   }
 
   static async create(data: CreateData) {
-    if (!isSupabaseAvailable()) {
+    if (!isSupabaseAvailable() || !supabase) {
       throw new Error("Supabase not available")
     }
 
     console.log(`Creating ${this.tableName}:`, data)
 
-    const { data: result, error } = await supabase!.from(this.tableName).insert(data).select().single()
+    try {
+      const { data: result, error } = await supabase.from(this.tableName).insert(data).select().single()
 
-    console.log(`${this.tableName} create result:`, result)
-    console.log(`${this.tableName} create error:`, error)
+      console.log(`${this.tableName} create result:`, result)
+      console.log(`${this.tableName} create error:`, error)
 
-    if (error) {
-      console.error(`Error creating ${this.tableName}:`, error)
+      if (error) {
+        console.error(`Error creating ${this.tableName}:`, error)
+        throw error
+      }
+      return result
+    } catch (error) {
+      console.error(`Create operation failed for ${this.tableName}:`, error)
       throw error
     }
-    return result
   }
 
   static async update(id: string, data: UpdateData) {
@@ -250,7 +266,7 @@ export class BlacklistedUserAgent extends BaseEntity {
 
     if (error) {
       console.error(`Error bulk upserting ${this.tableName}:`, error)
-      throw error
+      return []
     }
     return result || []
   }

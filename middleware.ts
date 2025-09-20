@@ -32,31 +32,35 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard") || pathname.startsWith("/profile")) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
     // Check if Supabase is configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (!supabaseUrl || !supabaseAnonKey) {
       console.warn("[v0] Supabase not configured, skipping auth check")
       return response
     }
 
     try {
       // Create Supabase client for server-side auth
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            get(name: string) {
-              return request.cookies.get(name)?.value
-            },
-            set(name: string, value: string, options: CookieOptions) {
-              response.cookies.set({ name, value, ...options })
-            },
-            remove(name: string, options: CookieOptions) {
-              response.cookies.set({ name, value: "", ...options })
-            },
+      const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            response.cookies.set({ name, value, ...options })
+          },
+          remove(name: string, options: CookieOptions) {
+            response.cookies.set({ name, value: "", ...options })
           },
         },
-      )
+      })
+
+      if (!supabase) {
+        console.warn("[v0] Failed to create Supabase client")
+        return response
+      }
 
       const {
         data: { user },
@@ -74,6 +78,11 @@ export async function middleware(request: NextRequest) {
 
       // Additional check for admin routes
       if (pathname.startsWith("/admin")) {
+        if (!user?.id) {
+          console.warn("[v0] User ID not available for admin check")
+          return response
+        }
+
         const { data: profile } = await supabase
           .from("users")
           .select("role, is_approved")
