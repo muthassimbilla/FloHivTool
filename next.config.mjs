@@ -50,7 +50,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' embed.tawk.to; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https: wss: embed.tawk.to; frame-ancestors 'none'; worker-src 'self';"
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://embed.tawk.to; style-src 'self' 'unsafe-inline' fonts.googleapis.com https://embed.tawk.to; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https: wss://tawk.to wss://*.tawk.to https://tawk.to https://*.tawk.to; frame-ancestors 'none'; worker-src 'self';"
           },
           {
             key: 'Strict-Transport-Security',
