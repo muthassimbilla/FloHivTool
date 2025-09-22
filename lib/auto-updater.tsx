@@ -3,8 +3,10 @@ export class AutoUpdater {
   private static instance: AutoUpdater
   private updateCheckInterval: NodeJS.Timeout | null = null
   private lastUpdateCheck = 0
-  private readonly CHECK_INTERVAL = 30000 // 30 seconds
+  private readonly CHECK_INTERVAL = 300000 // 5 minutes instead of 30 seconds
   private onUpdateAvailable?: () => void
+  private lastUpdateTime = 0
+  private readonly UPDATE_COOLDOWN = 60000 // 1 minute cooldown between updates
 
   private constructor() {}
 
@@ -23,8 +25,18 @@ export class AutoUpdater {
   startUpdateMonitoring() {
     if (typeof window === "undefined") return
 
+    const now = Date.now()
+    if (now - this.lastUpdateTime < this.UPDATE_COOLDOWN) {
+      console.log("[v0] Update monitoring skipped due to cooldown")
+      return
+    }
+
     // Check for updates immediately
     this.checkForUpdates()
+
+    if (this.updateCheckInterval) {
+      clearInterval(this.updateCheckInterval)
+    }
 
     // Set up periodic checks
     this.updateCheckInterval = setInterval(() => {
@@ -39,13 +51,19 @@ export class AutoUpdater {
     })
 
     window.addEventListener("online", () => {
-      this.checkForUpdates()
+      setTimeout(() => {
+        this.checkForUpdates()
+      }, 2000)
     })
   }
 
   private async checkForUpdates() {
     try {
       this.lastUpdateCheck = Date.now()
+
+      if (Date.now() - this.lastUpdateTime < this.UPDATE_COOLDOWN) {
+        return
+      }
 
       // Check if service worker has updates
       if ("serviceWorker" in navigator) {
@@ -73,7 +91,7 @@ export class AutoUpdater {
         const currentVersion = localStorage.getItem("app-version")
 
         if (currentVersion && currentVersion !== version) {
-          this.applyUpdate()
+          this.showUpdateNotification()
         } else {
           localStorage.setItem("app-version", version)
         }
@@ -97,7 +115,7 @@ export class AutoUpdater {
     notification.innerHTML = `
       <div class="flex items-center gap-2">
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
         </svg>
         <span>নতুন আপডেট পাওয়া গেছে!</span>
         <button onclick="this.parentElement.parentElement.remove(); window.location.reload();" class="ml-2 text-xs underline">
@@ -116,14 +134,22 @@ export class AutoUpdater {
     }, 10000)
   }
 
-  private async applyUpdate() {
+  async applyUpdate() {
     try {
+      this.lastUpdateTime = Date.now()
+
       // Update service worker
       if ("serviceWorker" in navigator) {
         const registration = await navigator.serviceWorker.getRegistration()
         if (registration?.waiting) {
           registration.waiting.postMessage({ type: "SKIP_WAITING" })
         }
+      }
+
+      const response = await fetch("/api/version", { cache: "no-cache" })
+      if (response.ok) {
+        const { version } = await response.json()
+        localStorage.setItem("app-version", version)
       }
 
       // Soft reload - reload current page content
