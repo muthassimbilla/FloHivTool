@@ -24,74 +24,28 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
-
-    /* Admin panel dark theme colors inspired by Vercel design */
-    --admin-background: 0 0% 3.9%;
-    --admin-foreground: 0 0% 98%;
-    --admin-card: 0 0% 3.9%;
-    --admin-card-foreground: 0 0% 98%;
-    --admin-border: 0 0% 14.9%;
-    --admin-input: 0 0% 14.9%;
-    --admin-primary: 0 0% 98%;
-    --admin-primary-foreground: 0 0% 9%;
-    --admin-secondary: 0 0% 14.9%;
-    --admin-secondary-foreground: 0 0% 98%;
-    --admin-muted: 0 0% 14.9%;
-    --admin-muted-foreground: 0 0% 63.9%;
-    --admin-accent: 0 0% 14.9%;
-    --admin-accent-foreground: 0 0% 98%;
-    --admin-sidebar: 0 0% 3.9%;
-    --admin-sidebar-foreground: 0 0% 63.9%;
-    --admin-sidebar-active: 0 0% 14.9%;
-    --admin-header: 0 0% 3.9%;
-    --admin-success: 142.1 76.2% 36.3%;
-    --admin-warning: 47.9 95.8% 53.1%;
-    --admin-error: 0 84.2% 60.2%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
-
-  /* Admin theme class for dark professional interface */
-  .admin-theme {
-    --background: var(--admin-background);
-    --foreground: var(--admin-foreground);
-    --card: var(--admin-card);
-    --card-foreground: var(--admin-card-foreground);
-    --popover: var(--admin-card);
-    --popover-foreground: var(--admin-card-foreground);
-    --primary: var(--admin-primary);
-    --primary-foreground: var(--admin-primary-foreground);
-    --secondary: var(--admin-secondary);
-    --secondary-foreground: var(--admin-secondary-foreground);
-    --muted: var(--admin-muted);
-    --muted-foreground: var(--admin-muted-foreground);
-    --accent: var(--admin-accent);
-    --accent-foreground: var(--admin-accent-foreground);
-    --destructive: var(--admin-error);
-    --destructive-foreground: var(--admin-foreground);
-    --border: var(--admin-border);
-    --input: var(--admin-input);
-    --ring: var(--admin-primary);
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
   }
 }
 
@@ -100,224 +54,77 @@
     @apply border-border;
   }
 
-  /* Enhanced scrollbar gutter to prevent layout shifts */
   html {
-    overflow-y: scroll !important;
+    overflow-y: scroll;
     scrollbar-gutter: stable both-edges;
-    /* Force scrollbar space reservation */
     width: 100vw;
     overflow-x: hidden;
+    /* Added smooth theme transition to html element */
+    transition: color-scheme 0.3s ease-in-out;
   }
 
   body {
     @apply bg-background text-foreground;
-    /* Enhanced font rendering and performance optimizations */
     font-display: swap;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Stronger scrollbar gutter enforcement */
     overflow-x: hidden;
-    overflow-y: scroll !important;
-    scrollbar-gutter: stable both-edges !important;
-    /* Prevent any width changes */
+    overflow-y: scroll;
+    scrollbar-gutter: stable both-edges;
     width: 100%;
     min-height: 100vh;
-    /* Optimize scrolling performance */
     scroll-behavior: smooth;
+    /* Added smooth background and text color transitions */
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
   }
 
-  /* Force consistent viewport width */
-  #__next,
-  [data-nextjs-scroll-focus-boundary] {
-    overflow-x: hidden;
-    width: 100%;
-  }
-}
-
-/* Admin panel specific styles */
-@layer components {
-  .admin-sidebar {
-    background: hsl(var(--admin-sidebar));
-    color: hsl(var(--admin-sidebar-foreground));
-    border-right: 1px solid hsl(var(--admin-border));
-  }
-
-  .admin-sidebar-item {
-    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors;
-    color: hsl(var(--admin-sidebar-foreground));
-  }
-
-  .admin-sidebar-item:hover {
-    background: hsl(var(--admin-sidebar-active));
-    color: hsl(var(--admin-foreground));
-  }
-
-  .admin-sidebar-item.active {
-    background: hsl(var(--admin-sidebar-active));
-    color: hsl(var(--admin-foreground));
-  }
-
-  .admin-header {
-    background: hsl(var(--admin-header));
-    border-bottom: 1px solid hsl(var(--admin-border));
-  }
-
-  .admin-card {
-    background: hsl(var(--admin-card));
-    border: 1px solid hsl(var(--admin-border));
-    color: hsl(var(--admin-card-foreground));
-  }
-
-  .admin-metric-card {
-    @apply admin-card p-6 rounded-lg;
-  }
-
-  .admin-metric-value {
-    @apply text-2xl font-bold;
-  }
-
-  .admin-metric-label {
-    @apply text-sm;
-    color: hsl(var(--admin-muted-foreground));
-  }
-
-  .admin-status-pending {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-    background: hsl(var(--admin-warning) / 0.1);
-    color: hsl(var(--admin-warning));
-  }
-
-  .admin-status-approved {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-    background: hsl(var(--admin-success) / 0.1);
-    color: hsl(var(--admin-success));
-  }
-
-  .admin-status-rejected {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-    background: hsl(var(--admin-error) / 0.1);
-    color: hsl(var(--admin-error));
+  /* Added universal smooth transitions for theme changes */
+  *,
+  *::before,
+  *::after {
+    transition:
+      background-color 0.3s ease-in-out,
+      border-color 0.3s ease-in-out,
+      color 0.3s ease-in-out,
+      fill 0.3s ease-in-out,
+      stroke 0.3s ease-in-out,
+      box-shadow 0.3s ease-in-out;
   }
 }
 
-/* Enhanced navigation link transitions */
-.nav-link-transition {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, background-color, box-shadow;
-  contain: layout style;
-}
-
-.nav-link-transition:hover {
-  transform: translateX(4px) scale(1.02);
-}
-
-.nav-link-active {
-  transform: translateX(4px);
-  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
-}
-
-/* Optimized shimmer animation for loading states */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.animate-shimmer {
-  animation: shimmer 1.5s ease-in-out infinite;
-  will-change: transform;
-  contain: layout style paint;
-}
-
-/* Hardware-accelerated pulse animation */
-@keyframes pulse-optimized {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.05);
-  }
-}
-
-.animate-pulse {
-  animation: pulse-optimized 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  will-change: opacity, transform;
-  contain: layout style paint;
-}
-
-/* Optimized spin animation for loaders */
-@keyframes spin-optimized {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin-optimized 1s linear infinite;
-  will-change: transform;
-  contain: layout style paint;
-}
-
-/* Enhanced scrollbar with hardware acceleration */
+/* Scrollbar styles with theme transitions */
 ::-webkit-scrollbar {
-  width: 16px !important; /* Wider for better visibility and consistency */
-  display: block !important; /* Force display */
+  width: 16px;
 }
 
 ::-webkit-scrollbar-track {
   @apply bg-slate-100 dark:bg-slate-800;
-  /* Always visible track with stronger background */
-  background-color: rgb(241 245 249) !important;
-  display: block !important;
-}
-
-.dark ::-webkit-scrollbar-track {
-  background-color: rgb(30 41 59) !important;
+  /* Added transition for scrollbar track */
+  transition: background-color 0.3s ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb {
   @apply bg-slate-400 dark:bg-slate-600 rounded-lg;
-  will-change: background-color;
-  /* Ensure thumb is always visible with minimum size */
-  min-height: 40px !important;
-  background-color: rgb(148 163 184) !important;
-  display: block !important;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background-color: rgb(75 85 99) !important;
+  min-height: 40px;
+  /* Added transition for scrollbar thumb */
+  transition: background-color 0.3s ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-500 dark:bg-slate-500;
-  background-color: rgb(100 116 139) !important;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(107 114 128) !important;
-}
-
-/* Enhanced Firefox scrollbar with forced visibility */
 * {
-  scrollbar-width: auto !important;
-  scrollbar-color: rgb(148 163 184) rgb(241 245 249) !important;
+  scrollbar-width: auto;
+  scrollbar-color: rgb(148 163 184) rgb(241 245 249);
 }
 
 .dark * {
-  scrollbar-color: rgb(75 85 99) rgb(30 41 59) !important;
+  scrollbar-color: rgb(75 85 99) rgb(30 41 59);
 }
 
-/* Respect user motion preferences */
+/* Respect user's motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -327,68 +134,15 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-
-  .animate-shimmer,
-  .animate-pulse,
-  .animate-spin {
-    animation: none !important;
-  }
-
-  .nav-link-transition {
-    transition: none !important;
-  }
-}
-
-/* Optimize for better paint performance and prevent layout shifts */
-.group:hover .group-hover\:opacity-100 {
-  will-change: opacity;
-  contain: layout style;
-}
-
-.transition-all {
-  will-change: transform, opacity;
-  contain: layout style;
-}
-
-/* Optimize hover states to prevent repaints */
-.hover\:shadow-lg:hover {
-  will-change: box-shadow;
-  contain: layout style;
-}
-
-.hover\:border-indigo-300:hover {
-  will-change: border-color;
-  contain: layout style;
-}
-
-/* Optimize focus states for better accessibility */
-.focus\:ring-2:focus {
-  will-change: box-shadow;
-  contain: layout style;
-}
-
-/* Prevent layout shifts in loading states */
-.loading-skeleton {
-  min-height: 2rem;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  background-size: 200% 100%;
-  contain: layout style paint;
-}
-
-/* Optimize backdrop blur for better performance */
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  will-change: backdrop-filter;
-  contain: layout style;
 }
 
 @layer components {
   .hero-section {
-    @apply min-h-screen p-4 md:p-6;
+    min-height: 100vh;
+    padding: 1rem;
     background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #f1f5f9 100%);
-    contain: layout style paint;
-    will-change: transform;
+    /* Added transition for hero section background */
+    transition: background 0.3s ease-in-out;
   }
 
   .dark .hero-section {
@@ -396,35 +150,25 @@
   }
 
   .card-optimized {
-    @apply backdrop-blur-sm border-0 shadow-xl;
     background: rgba(255, 255, 255, 0.8);
-    contain: layout style;
-    will-change: transform;
+    backdrop-filter: blur(12px);
+    border: none;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    /* Added transition for card background and shadow */
+    transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   }
 
   .dark .card-optimized {
     background: rgba(30, 41, 59, 0.8);
   }
 
-  .button-primary {
-    @apply shadow-lg;
-    background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
-    contain: layout style;
-    will-change: transform;
-    /* Prevent layout shifts on hover */
-    transform: translateZ(0);
+  /* Added theme toggle animation styles */
+  .theme-toggle-icon {
+    transform-origin: center;
+    transition: transform 0.2s ease-in-out;
   }
 
-  .button-primary:hover {
-    background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
-    transform: translateZ(0) scale(1.02);
-  }
-
-  .dark .button-primary {
-    background: linear-gradient(135deg, #4338ca 0%, #1d4ed8 100%);
-  }
-
-  .dark .button-primary:hover {
-    background: linear-gradient(135deg, #3730a3 0%, #1e40af 100%);
+  .theme-toggle-icon:hover {
+    transform: rotate(15deg) scale(1.1);
   }
 }

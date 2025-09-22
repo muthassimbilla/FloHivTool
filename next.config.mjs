@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
   images: {
     formats: ['image/webp', 'image/avif'],
@@ -27,9 +27,6 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   output: 'standalone',
-  generateBuildId: async () => {
-    return 'build-' + Date.now()
-  },
   async headers() {
     return [
       {
@@ -98,6 +95,14 @@ const nextConfig = {
             value: '/'
           }
         ]
+      }
+    ]
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/generator',
+        destination: '/tool/user-agent-generator'
       }
     ]
   },

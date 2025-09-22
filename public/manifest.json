@@ -1,6 +1,6 @@
 {
-  "name": "UAGen Pro - User Agent Generator",
-  "short_name": "UAGen Pro",
+  "name": "Flo Hiv Tool - User Agent Generator",
+  "short_name": "Flo Hiv Tool",
   "description": "Generate thousands of unique, professional-grade iOS and Android user agents",
   "start_url": "/",
   "display": "standalone",
@@ -23,5 +23,27 @@
   ],
   "categories": ["productivity", "developer", "utilities"],
   "lang": "en",
-  "dir": "ltr"
+  "dir": "ltr",
+  "scope": "/",
+  "id": "flo-hiv-tool",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "shortcuts": [
+    {
+      "name": "Generate User Agents",
+      "short_name": "Generate",
+      "description": "Quickly generate user agents",
+      "url": "/tool",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }

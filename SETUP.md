@@ -1,4 +1,4 @@
-# User Agent Generator Setup Guide
+# Flo Hiv Tool Setup Guide
 
 ## 1. Supabase Setup
 
@@ -50,6 +50,3 @@ Other users will need manual approval.
 - If you get permission errors, make sure RLS policies are set correctly
 - If authentication doesn't work, check your Site URL in Supabase settings
 - If tables don't exist, run the SQL scripts again
-\`\`\`
-
-এখন missing UI components যোগ করি:
