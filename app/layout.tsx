@@ -17,6 +17,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://flohivtool.vercel.app"),
   title: "Flo Hiv Tool - Professional User Agent Generator for iOS & Samsung",
   description:
     "Generate thousands of unique, professional-grade iOS and Samsung user agents for Instagram and Facebook. Fast, secure, and reliable user agent generation tool.",
